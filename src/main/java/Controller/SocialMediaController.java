@@ -19,15 +19,14 @@ public class SocialMediaController {
         this.messageService = new MessageService();
     }
 
-    /**
-     * @return a Javalin app object which defines the behavior of the Javalin controller.
-     */
     public Javalin startAPI() {
         Javalin app = Javalin.create();
 
-        app.get("example-endpoint", this::exampleHandler);
+        // Account
         app.post("/register", this::postRegisterHandler);
         app.post("/login", this::postLoginHandler);
+
+        // Messages
         app.post("/messages", this::postMessageHandler);
         app.get("/messages", this::getAllMessagesHandler);
         app.get("/messages/{message_id}", this::getMessageByIdHandler);
@@ -35,24 +34,17 @@ public class SocialMediaController {
         app.patch("/messages/{message_id}", this::patchMessageTextHandler);
         app.get("/accounts/{account_id}/messages", this::getMessagesForAccountHandler);
 
+        // Exception handling
+        app.exception(JsonProcessingException.class, this::JsonExceptionHandler);
+
         return app;
     }
 
-    private void exampleHandler(Context ctx) {
-        ctx.json("sample text");
-    }
-
-    private void postRegisterHandler(Context ctx) {
+    private void postRegisterHandler(Context ctx) throws JsonProcessingException {
 
         // Parse the body
         ObjectMapper mapper = new ObjectMapper();
-        Account account;
-        try {
-            account = mapper.readValue(ctx.body(), Account.class);
-        } catch (JsonProcessingException e) {
-            ctx.status(400).result("Error parsing JSON body");
-            return;
-        }
+        Account account = mapper.readValue(ctx.body(), Account.class);
 
         // Validate inputs
         if (account.username.isEmpty()) {
@@ -74,9 +66,47 @@ public class SocialMediaController {
         // Hash password
         // TODO: implement password hashing
 
-        // Create new account
-        
+        // Save account to db
+        Account savedAccount = this.accountService.createAccount(account);
 
+        // Respond
+        if (savedAccount == null) {
+            ctx.status(400).result("Error saving to database");
+            return;
+        }
+        ctx.json(mapper.writeValueAsString(savedAccount));
+    }
+
+    private void postLoginHandler(Context ctx) throws JsonProcessingException {
+        ctx.result("Not yet implemented");
+    }
+
+    private void postMessageHandler(Context ctx) throws JsonProcessingException {
+        ctx.result("Not yet implemented");
+    }
+
+    private void getAllMessagesHandler(Context ctx) throws JsonProcessingException {
+        ctx.result("Not yet implemented");
+    }
+
+    private void getMessageByIdHandler(Context ctx) throws JsonProcessingException {
+        ctx.result("Not yet implemented");
+    }
+
+    private void deleteMessageByIdHandler(Context ctx) throws JsonProcessingException {
+        ctx.result("Not yet implemented");
+    }
+
+    private void patchMessageTextHandler(Context ctx) throws JsonProcessingException {
+        ctx.result("Not yet implemented");
+    }
+
+    private void getMessagesForAccountHandler(Context ctx) throws JsonProcessingException {
+        ctx.result("Not yet implemented");
+    }
+
+    private void JsonExceptionHandler(Exception e, Context ctx) {
+        ctx.status(400).result("Error processing JSON: " + e.getMessage());
     }
 
 
