@@ -11,8 +11,8 @@ public class AccountService {
         this.accountDAO = new AccountDAO();
     }
 
-    public AccountService(AccountDAO AccountDAO) {
-        this.accountDAO = AccountDAO;
+    public AccountService(AccountDAO accountDAO) {
+        this.accountDAO = accountDAO;
     }
 
     public Account createAccount(Account account) {
