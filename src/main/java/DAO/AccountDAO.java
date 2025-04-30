@@ -10,7 +10,7 @@ import Util.ConnectionUtil;
 
 public class AccountDAO {
 
-    public Account insertAccount(Account account) {
+    public boolean insertAccount(Account account) {
         Connection conn = ConnectionUtil.getConnection();
         try {
             String sql = "INSERT INTO Account (username, password) VALUES (?, ?)";
@@ -18,13 +18,13 @@ public class AccountDAO {
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, account.getUsername());
             ps.setString(2, account.getPassword());
-            ps.executeUpdate();
+            int numRowsAffected = ps.executeUpdate();
 
-            return account;
+            return numRowsAffected > 0 ? true : false;
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+            return false;
         }
-        return null;
     }
 
     public Account getAccountByUsername(String username) {
