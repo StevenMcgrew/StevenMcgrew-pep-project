@@ -28,6 +28,7 @@ public class AccountService {
         if (account == null) {
             return null;
         }
+        // TODO: use password hashing library to compare hashes instead of plain text
         if (!password.equals(account.password)) {
             return null;
         }

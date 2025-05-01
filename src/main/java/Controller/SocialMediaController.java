@@ -25,11 +25,11 @@ public class SocialMediaController {
     public Javalin startAPI() {
         Javalin app = Javalin.create();
 
-        // Account
+        // Account routes
         app.post("/register", this::postRegisterHandler);
         app.post("/login", this::postLoginHandler);
 
-        // Messages
+        // Message routes
         app.post("/messages", this::postMessageHandler);
         app.get("/messages", this::getAllMessagesHandler);
         app.get("/messages/{message_id}", this::getMessageByIdHandler);
@@ -37,7 +37,7 @@ public class SocialMediaController {
         app.patch("/messages/{message_id}", this::patchMessageTextHandler);
         app.get("/accounts/{account_id}/messages", this::getMessagesForAccountHandler);
 
-        // Exception handling
+        // Exception handling routes
         app.exception(JsonProcessingException.class, this::JsonExceptionHandler);
 
         return app;

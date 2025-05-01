@@ -18,7 +18,7 @@ public class MessageDAO {
         Connection conn = ConnectionUtil.getConnection();
         try {
             String sql = "INSERT INTO Message (posted_by, message_text, time_posted_epoch) " +
-                         "VALUES (?, ?, ?)";
+                    "VALUES (?, ?, ?)";
 
             PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setInt(1, message.getPosted_by());
@@ -35,7 +35,7 @@ public class MessageDAO {
             return null;
         } catch (SQLException e) {
             System.out.println(e.getMessage());
-        } 
+        }
         return null;
     }
 
@@ -109,7 +109,7 @@ public class MessageDAO {
         Connection conn = ConnectionUtil.getConnection();
         try {
             String sql = "UPDATE Message SET message_text = ? " +
-                         "WHERE message_id = ?";
+                    "WHERE message_id = ?";
 
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, text);
