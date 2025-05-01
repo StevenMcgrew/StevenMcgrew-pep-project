@@ -68,17 +68,30 @@ public class SocialMediaController {
 
         // Save account to db
         Account savedAccount = this.accountService.createAccount(account);
-
-        // Respond
         if (savedAccount == null) {
             ctx.status(400).result("Error saving to database");
             return;
         }
+
+        // Respond
         ctx.json(mapper.writeValueAsString(savedAccount));
     }
 
     private void postLoginHandler(Context ctx) throws JsonProcessingException {
-        ctx.result("Not yet implemented");
+
+        // Parse the body
+        ObjectMapper mapper = new ObjectMapper();
+        Account account = mapper.readValue(ctx.body(), Account.class);
+
+        // Login
+        Account loggedInAccount = this.accountService.login(account.username, account.password);
+        if (loggedInAccount == null) {
+            ctx.status(401).result("Account not found. Check username and/or password.");
+            return;
+        }
+
+        // Respond
+        ctx.json(mapper.writeValueAsString(loggedInAccount));
     }
 
     private void postMessageHandler(Context ctx) throws JsonProcessingException {
@@ -108,6 +121,5 @@ public class SocialMediaController {
     private void JsonExceptionHandler(Exception e, Context ctx) {
         ctx.status(400).result("Error processing JSON: " + e.getMessage());
     }
-
 
 }
