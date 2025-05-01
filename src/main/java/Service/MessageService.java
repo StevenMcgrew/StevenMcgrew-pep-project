@@ -33,11 +33,15 @@ public class MessageService {
     }
 
     public Message deleteMessageById(int id) {
+        Message msg = this.messageDAO.getMessageById(id);
+        if (msg == null) {
+            return null;
+        }
         Integer recordId = this.messageDAO.deleteMessageById(id);
         if (recordId == null) {
             return null;
         }
-        return this.messageDAO.getMessageById(recordId);
+        return msg;
     }
 
     public Message updateMessageText(int id, String text) {

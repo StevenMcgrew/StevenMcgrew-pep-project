@@ -50,18 +50,18 @@ public class SocialMediaController {
 
         // Validate inputs
         if (account.username.isEmpty()) {
-            ctx.status(400).result("Username cannot be empty");
+            ctx.status(400);
             return;
         }
         if (account.password.length() < 4) {
-            ctx.status(400).result("Password must have at least 4 characters");
+            ctx.status(400);
             return;
         }
 
         // Check if username is already in use
         Account existingAcct = this.accountService.getAccountByUsername(account.username);
         if (existingAcct != null) {
-            ctx.status(400).result("An account with that username already exists");
+            ctx.status(400);
             return;
         }
 
@@ -71,7 +71,7 @@ public class SocialMediaController {
         // Save account to db
         Account savedAccount = this.accountService.createAccount(account);
         if (savedAccount == null) {
-            ctx.status(400).result("Error saving to database");
+            ctx.status(400);
             return;
         }
 
@@ -87,7 +87,7 @@ public class SocialMediaController {
         // Login
         Account loggedInAccount = this.accountService.login(account.username, account.password);
         if (loggedInAccount == null) {
-            ctx.status(401).result("Account not found. Check username and/or password.");
+            ctx.status(401);
             return;
         }
 
@@ -102,25 +102,25 @@ public class SocialMediaController {
 
         // Validate inputs
         if (message.message_text.isEmpty()) {
-            ctx.status(400).result("Message text cannot be empty");
+            ctx.status(400);
             return;
         }
         if (message.message_text.length() > 255) {
-            ctx.status(400).result("Message texst must have be less than 255 characters");
+            ctx.status(400);
             return;
         }
 
         // Check if 'posted_by' account exists
         Account existingAcct = this.accountService.getAccountById(message.posted_by);
         if (existingAcct == null) {
-            ctx.status(400).result("An account with that id does not exist");
+            ctx.status(400);
             return;
         }
 
         // Save message to db
         Message savedMessage = this.messageService.createMessage(message);
         if (savedMessage == null) {
-            ctx.status(400).result("Error saving to database");
+            ctx.status(400);
             return;
         }
 
@@ -145,6 +145,10 @@ public class SocialMediaController {
         Message msg = this.messageService.getMessageById(id);
 
         // Respond
+        if (msg == null) {
+            ctx.status(200);
+            return;
+        }
         ObjectMapper mapper = new ObjectMapper();
         ctx.json(mapper.writeValueAsString(msg));
     }
@@ -155,8 +159,13 @@ public class SocialMediaController {
 
         // Delete message from db
         Message msg = this.messageService.deleteMessageById(id);
+        System.out.println("Message: " + msg);
 
         // Respond
+        if (msg == null) {
+            ctx.status(200);
+            return;
+        }
         ObjectMapper mapper = new ObjectMapper();
         ctx.json(mapper.writeValueAsString(msg));
     }
@@ -171,25 +180,25 @@ public class SocialMediaController {
 
         // Validate inputs
         if (message.message_text.isEmpty()) {
-            ctx.status(400).result("Message text cannot be empty");
+            ctx.status(400);
             return;
         }
         if (message.message_text.length() > 255) {
-            ctx.status(400).result("Message texst must have be less than 255 characters");
+            ctx.status(400);
             return;
         }
 
         // Check if message exists
         Message existingMsg = this.messageService.getMessageById(id);
         if (existingMsg == null) {
-            ctx.status(400).result("No message found with that id");
+            ctx.status(400);
             return;
         }
 
         // Update message text in db
         Message updatedMsg = this.messageService.updateMessageText(id, message.message_text);
         if (updatedMsg == null) {
-            ctx.status(400).result("Error updating database");
+            ctx.status(400);
             return;
         }
 
@@ -210,7 +219,7 @@ public class SocialMediaController {
     }
 
     private void JsonExceptionHandler(Exception e, Context ctx) {
-        ctx.status(400).result("Error processing JSON: " + e.getMessage());
+        ctx.status(400);
     }
 
 }

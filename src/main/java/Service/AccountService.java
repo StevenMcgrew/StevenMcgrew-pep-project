@@ -28,7 +28,7 @@ public class AccountService {
         if (account == null) {
             return null;
         }
-        if (account.password != password) {
+        if (!password.equals(account.password)) {
             return null;
         }
         return account;
