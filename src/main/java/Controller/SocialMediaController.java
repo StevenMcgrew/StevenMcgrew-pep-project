@@ -1,11 +1,14 @@
 package Controller;
 
+import java.util.List;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import io.javalin.Javalin;
 import io.javalin.http.Context;
 import Model.Account;
+import Model.Message;
 import Service.AccountService;
 import Service.MessageService;
 
@@ -41,7 +44,6 @@ public class SocialMediaController {
     }
 
     private void postRegisterHandler(Context ctx) throws JsonProcessingException {
-
         // Parse the body
         ObjectMapper mapper = new ObjectMapper();
         Account account = mapper.readValue(ctx.body(), Account.class);
@@ -78,7 +80,6 @@ public class SocialMediaController {
     }
 
     private void postLoginHandler(Context ctx) throws JsonProcessingException {
-
         // Parse the body
         ObjectMapper mapper = new ObjectMapper();
         Account account = mapper.readValue(ctx.body(), Account.class);
@@ -95,27 +96,117 @@ public class SocialMediaController {
     }
 
     private void postMessageHandler(Context ctx) throws JsonProcessingException {
-        ctx.result("Not yet implemented");
+        // Parse the body
+        ObjectMapper mapper = new ObjectMapper();
+        Message message = mapper.readValue(ctx.body(), Message.class);
+
+        // Validate inputs
+        if (message.message_text.isEmpty()) {
+            ctx.status(400).result("Message text cannot be empty");
+            return;
+        }
+        if (message.message_text.length() > 255) {
+            ctx.status(400).result("Message texst must have be less than 255 characters");
+            return;
+        }
+
+        // Check if 'posted_by' account exists
+        Account existingAcct = this.accountService.getAccountById(message.posted_by);
+        if (existingAcct == null) {
+            ctx.status(400).result("An account with that id does not exist");
+            return;
+        }
+
+        // Save message to db
+        Message savedMessage = this.messageService.createMessage(message);
+        if (savedMessage == null) {
+            ctx.status(400).result("Error saving to database");
+            return;
+        }
+
+        // Respond
+        ctx.json(mapper.writeValueAsString(savedMessage));
     }
 
     private void getAllMessagesHandler(Context ctx) throws JsonProcessingException {
-        ctx.result("Not yet implemented");
+        // Get all messages from db
+        List<Message> allMessages = this.messageService.getAllMessages();
+
+        // Respond
+        ObjectMapper mapper = new ObjectMapper();
+        ctx.json(mapper.writeValueAsString(allMessages));
     }
 
     private void getMessageByIdHandler(Context ctx) throws JsonProcessingException {
-        ctx.result("Not yet implemented");
+        // Get id from path parameter
+        int id = Integer.parseInt(ctx.pathParam("message_id"));
+
+        // Get message from db
+        Message msg = this.messageService.getMessageById(id);
+
+        // Respond
+        ObjectMapper mapper = new ObjectMapper();
+        ctx.json(mapper.writeValueAsString(msg));
     }
 
     private void deleteMessageByIdHandler(Context ctx) throws JsonProcessingException {
-        ctx.result("Not yet implemented");
+        // Get id from path parameter
+        int id = Integer.parseInt(ctx.pathParam("message_id"));
+
+        // Delete message from db
+        Message msg = this.messageService.deleteMessageById(id);
+
+        // Respond
+        ObjectMapper mapper = new ObjectMapper();
+        ctx.json(mapper.writeValueAsString(msg));
     }
 
     private void patchMessageTextHandler(Context ctx) throws JsonProcessingException {
-        ctx.result("Not yet implemented");
+        // Get id from path parameter
+        int id = Integer.parseInt(ctx.pathParam("message_id"));
+
+        // Parse the body
+        ObjectMapper mapper = new ObjectMapper();
+        Message message = mapper.readValue(ctx.body(), Message.class);
+
+        // Validate inputs
+        if (message.message_text.isEmpty()) {
+            ctx.status(400).result("Message text cannot be empty");
+            return;
+        }
+        if (message.message_text.length() > 255) {
+            ctx.status(400).result("Message texst must have be less than 255 characters");
+            return;
+        }
+
+        // Check if message exists
+        Message existingMsg = this.messageService.getMessageById(id);
+        if (existingMsg == null) {
+            ctx.status(400).result("No message found with that id");
+            return;
+        }
+
+        // Update message text in db
+        Message updatedMsg = this.messageService.updateMessageText(id, message.message_text);
+        if (updatedMsg == null) {
+            ctx.status(400).result("Error updating database");
+            return;
+        }
+
+        // Respond
+        ctx.json(mapper.writeValueAsString(updatedMsg));
     }
 
     private void getMessagesForAccountHandler(Context ctx) throws JsonProcessingException {
-        ctx.result("Not yet implemented");
+        // Get id from path parameter
+        int account_id = Integer.parseInt(ctx.pathParam("account_id"));
+
+        // Get messages from db
+        List<Message> accountMessages = this.messageService.getAllMessagesForAccount(account_id);
+
+        // Respond
+        ObjectMapper mapper = new ObjectMapper();
+        ctx.json(mapper.writeValueAsString(accountMessages));
     }
 
     private void JsonExceptionHandler(Exception e, Context ctx) {

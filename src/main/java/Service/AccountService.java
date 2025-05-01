@@ -16,11 +16,7 @@ public class AccountService {
     }
 
     public Account createAccount(Account account) {
-        boolean isSuccess = this.accountDAO.insertAccount(account);
-        if (!isSuccess) {
-            return null;
-        }
-        return this.accountDAO.getAccountByUsername(account.username);
+        return this.accountDAO.insertAccount(account);
     }
 
     public Account login(String username, String password) {
@@ -36,6 +32,10 @@ public class AccountService {
 
     public Account getAccountByUsername(String username) {
         return this.accountDAO.getAccountByUsername(username);
+    }
+
+    public Account getAccountById(int id) {
+        return this.accountDAO.getAccountById(id);
     }
 
 }

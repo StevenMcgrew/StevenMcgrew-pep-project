@@ -33,11 +33,7 @@ public class MessageService {
         if (msg == null) {
             return null;
         }
-        boolean isDeleted = this.messageDAO.deleteMessageById(id);
-        if (!isDeleted) {
-            return null;
-        }
-        return msg;
+        return this.messageDAO.deleteMessageById(id);
     }
 
     public Message updateMessageText(int id, String text) {
@@ -45,12 +41,7 @@ public class MessageService {
         if (msg == null) {
             return null;
         }
-        boolean isUpdated = this.messageDAO.updateMessageText(id, text);
-        if (!isUpdated) {
-            return null;
-        }
-        msg.message_text = text;
-        return msg;
+        return this.messageDAO.updateMessageText(id, text);
     }
 
     public List<Message> getAllMessagesForAccount(int account_id) {

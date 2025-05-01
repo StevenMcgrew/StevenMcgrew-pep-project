@@ -16,18 +16,25 @@ public class MessageDAO {
         Connection conn = ConnectionUtil.getConnection();
         try {
             String sql = "INSERT INTO Message (posted_by, message_text, time_posted_epoch) " +
-                    "VALUES (?, ?, ?)";
+                         "VALUES (?, ?, ?) RETURNING *";
 
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, message.getPosted_by());
             ps.setString(2, message.getMessage_text());
             ps.setLong(3, message.getTime_posted_epoch());
-            ps.executeUpdate();
+            ResultSet rs = ps.executeQuery();
 
-            return message;
+            while (rs.next()) {
+                Message returnedMessage = new Message(
+                        rs.getInt("message_id"),
+                        rs.getInt("posted_by"),
+                        rs.getString("message_text"),
+                        rs.getLong("time_posted_epoch"));
+                return returnedMessage;
+            }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
-        }
+        } 
         return null;
     }
 
@@ -48,10 +55,11 @@ public class MessageDAO {
                         rs.getLong("time_posted_epoch"));
                 messages.add(msg);
             }
+            return messages;
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+            return messages;
         }
-        return messages;
     }
 
     public Message getMessageById(int id) {
@@ -77,37 +85,52 @@ public class MessageDAO {
         return null;
     }
 
-    public boolean deleteMessageById(int id) {
+    public Message deleteMessageById(int id) {
         Connection conn = ConnectionUtil.getConnection();
         try {
-            String sql = "DELETE FROM Message WHERE message_id = ?";
+            String sql = "DELETE FROM Message WHERE message_id = ? RETURNING *";
 
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, id);
-            int numRowsAffected = ps.executeUpdate();
+            ResultSet rs = ps.executeQuery();
 
-            return numRowsAffected > 0 ? true : false;
+            while (rs.next()) {
+                Message returnedMessage = new Message(
+                        rs.getInt("message_id"),
+                        rs.getInt("posted_by"),
+                        rs.getString("message_text"),
+                        rs.getLong("time_posted_epoch"));
+                return returnedMessage;
+            }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
-            return false;
         }
+        return null;
     }
 
-    public boolean updateMessageText(int id, String text) {
+    public Message updateMessageText(int id, String text) {
         Connection conn = ConnectionUtil.getConnection();
         try {
-            String sql = "UPDATE Message SET message_text = ? WHERE message_id = ?";
+            String sql = "UPDATE Message SET message_text = ?" +
+                         "WHERE message_id = ? RETURNING *";
 
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, text);
             ps.setInt(2, id);
-            int numRowsAffected = ps.executeUpdate();
+            ResultSet rs = ps.executeQuery();
 
-            return numRowsAffected > 0 ? true : false;
+            while (rs.next()) {
+                Message returnedMessage = new Message(
+                        rs.getInt("message_id"),
+                        rs.getInt("posted_by"),
+                        rs.getString("message_text"),
+                        rs.getLong("time_posted_epoch"));
+                return returnedMessage;
+            }
         } catch (SQLException e) {
             System.out.println(e.getMessage());
-            return false;
         }
+        return null;
     }
 
     public List<Message> getAllMessagesForAccount(int account_id) {
@@ -128,10 +151,11 @@ public class MessageDAO {
                         rs.getLong("time_posted_epoch"));
                 messages.add(msg);
             }
+            return messages;
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+            return messages;
         }
-        return messages;
     }
 
 }
