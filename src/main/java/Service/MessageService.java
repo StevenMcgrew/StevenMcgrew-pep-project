@@ -17,7 +17,11 @@ public class MessageService {
     }
 
     public Message createMessage(Message message) {
-        return this.messageDAO.insertMessage(message);
+        Integer recordId = this.messageDAO.insertMessage(message);
+        if (recordId == null) {
+            return null;
+        }
+        return this.messageDAO.getMessageById(recordId);
     }
 
     public List<Message> getAllMessages() {
@@ -29,19 +33,19 @@ public class MessageService {
     }
 
     public Message deleteMessageById(int id) {
-        Message msg = this.messageDAO.getMessageById(id);
-        if (msg == null) {
+        Integer recordId = this.messageDAO.deleteMessageById(id);
+        if (recordId == null) {
             return null;
         }
-        return this.messageDAO.deleteMessageById(id);
+        return this.messageDAO.getMessageById(recordId);
     }
 
     public Message updateMessageText(int id, String text) {
-        Message msg = this.messageDAO.getMessageById(id);
-        if (msg == null) {
+        Integer recordId = this.messageDAO.updateMessageText(id, text);
+        if (recordId == null) {
             return null;
         }
-        return this.messageDAO.updateMessageText(id, text);
+        return this.messageDAO.getMessageById(recordId);
     }
 
     public List<Message> getAllMessagesForAccount(int account_id) {

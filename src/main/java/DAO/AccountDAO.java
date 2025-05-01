@@ -2,6 +2,7 @@ package DAO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.Statement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
@@ -10,28 +11,27 @@ import Util.ConnectionUtil;
 
 public class AccountDAO {
 
-    public Account insertAccount(Account account) {
+    public Integer insertAccount(Account account) {
         Connection conn = ConnectionUtil.getConnection();
         try {
-            String sql = "INSERT INTO Account (username, password)" +
-                         "VALUES (?, ?) RETURNING *";
+            String sql = "INSERT INTO Account (username, password) VALUES (?, ?)";
 
-            PreparedStatement ps = conn.prepareStatement(sql);
+            PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, account.getUsername());
             ps.setString(2, account.getPassword());
-            ResultSet rs = ps.executeQuery();
+            int numRowsAffected = ps.executeUpdate();
 
-            while (rs.next()) {
-                Account returnedAccount = new Account(
-                        rs.getInt("account_id"),
-                        rs.getString("username"),
-                        rs.getString("password"));
-                return returnedAccount;
+            if (numRowsAffected > 0) {
+                ResultSet generatedKeys = ps.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                }
             }
+            return null;
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+            return null;
         }
-        return null;
     }
 
     public Account getAccountByUsername(String username) {

@@ -2,6 +2,7 @@ package DAO;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -12,26 +13,25 @@ import Util.ConnectionUtil;
 
 public class MessageDAO {
 
-    public Message insertMessage(Message message) {
+    public Integer insertMessage(Message message) {
         Connection conn = ConnectionUtil.getConnection();
         try {
             String sql = "INSERT INTO Message (posted_by, message_text, time_posted_epoch) " +
-                         "VALUES (?, ?, ?) RETURNING *";
+                         "VALUES (?, ?, ?)";
 
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, message.getPosted_by());
             ps.setString(2, message.getMessage_text());
             ps.setLong(3, message.getTime_posted_epoch());
-            ResultSet rs = ps.executeQuery();
+            int numRowsAffected = ps.executeUpdate();
 
-            while (rs.next()) {
-                Message returnedMessage = new Message(
-                        rs.getInt("message_id"),
-                        rs.getInt("posted_by"),
-                        rs.getString("message_text"),
-                        rs.getLong("time_posted_epoch"));
-                return returnedMessage;
+            if (numRowsAffected > 0) {
+                ResultSet generatedKeys = ps.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                }
             }
+            return null;
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         } 
@@ -85,48 +85,46 @@ public class MessageDAO {
         return null;
     }
 
-    public Message deleteMessageById(int id) {
+    public Integer deleteMessageById(int id) {
         Connection conn = ConnectionUtil.getConnection();
         try {
-            String sql = "DELETE FROM Message WHERE message_id = ? RETURNING *";
+            String sql = "DELETE FROM Message WHERE message_id = ?";
 
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setInt(1, id);
-            ResultSet rs = ps.executeQuery();
+            int numRowsAffected = ps.executeUpdate();
 
-            while (rs.next()) {
-                Message returnedMessage = new Message(
-                        rs.getInt("message_id"),
-                        rs.getInt("posted_by"),
-                        rs.getString("message_text"),
-                        rs.getLong("time_posted_epoch"));
-                return returnedMessage;
+            if (numRowsAffected > 0) {
+                ResultSet generatedKeys = ps.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                }
             }
+            return null;
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
         return null;
     }
 
-    public Message updateMessageText(int id, String text) {
+    public Integer updateMessageText(int id, String text) {
         Connection conn = ConnectionUtil.getConnection();
         try {
-            String sql = "UPDATE Message SET message_text = ?" +
-                         "WHERE message_id = ? RETURNING *";
+            String sql = "UPDATE Message SET message_text = ? " +
+                         "WHERE message_id = ?";
 
             PreparedStatement ps = conn.prepareStatement(sql);
             ps.setString(1, text);
             ps.setInt(2, id);
-            ResultSet rs = ps.executeQuery();
+            int numRowsAffected = ps.executeUpdate();
 
-            while (rs.next()) {
-                Message returnedMessage = new Message(
-                        rs.getInt("message_id"),
-                        rs.getInt("posted_by"),
-                        rs.getString("message_text"),
-                        rs.getLong("time_posted_epoch"));
-                return returnedMessage;
+            if (numRowsAffected > 0) {
+                ResultSet generatedKeys = ps.getGeneratedKeys();
+                if (generatedKeys.next()) {
+                    return generatedKeys.getInt(1);
+                }
             }
+            return null;
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }

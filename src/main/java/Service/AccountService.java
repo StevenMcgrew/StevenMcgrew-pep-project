@@ -16,7 +16,11 @@ public class AccountService {
     }
 
     public Account createAccount(Account account) {
-        return this.accountDAO.insertAccount(account);
+        Integer recordId = this.accountDAO.insertAccount(account);
+        if (recordId == null) {
+            return null;
+        }
+        return this.accountDAO.getAccountById(recordId);
     }
 
     public Account login(String username, String password) {
